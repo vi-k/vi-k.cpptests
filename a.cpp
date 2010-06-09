@@ -15,10 +15,9 @@ char* i_to_s(int v, char *str)
 		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     if (v < 0)
-    {
         *str++ = '-';
-        //v = -v;
-    }
+    else
+        v = -v;
 
 	char *ptr = str;
 
@@ -26,7 +25,7 @@ char* i_to_s(int v, char *str)
 	{
 		int n = v / 10;
 		int o = v - (n<<3) - (n<<1); /* -(n * 10) */
-		*ptr++ = sym[o];
+		*ptr++ = sym[-o];
 		v = n;
 	}
 
@@ -76,10 +75,12 @@ int main(void)
     itoa10(123456789, buf);
     cout << buf << endl;
 
+    cout << -129/10 << endl;
+
     i_to_s(2147483647, buf);
     cout << buf << endl;
 
-    i_to_s(-2147483647, buf);
+    i_to_s(-2147483648, buf);
     cout << buf << endl;
 
     return 0;

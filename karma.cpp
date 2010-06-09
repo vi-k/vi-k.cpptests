@@ -71,6 +71,38 @@ char* i_to_s(int v, char *str)
 	return ptr;
 }
 
+inline char* i_to_s2(int v, char *str)
+{
+	static const char sym[]
+		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+    if (v < 0)
+        *str++ = '-';
+    else
+        v = -v;
+
+	char *ptr = str;
+
+	while (v)
+	{
+		int n = v / 10;
+		int o = v - (n<<3) - (n<<1); /* -(n * 10) */
+		*ptr++ = sym[-o];
+		v = n;
+	}
+
+	*ptr-- = 0;
+
+    while (str < ptr)
+   	{
+        char tmp = *ptr;
+        *ptr-- = *str;
+        *str++ = tmp;
+    }
+
+	return ptr;
+}
+
 char* z_itoa(int value, char* result, int base) {
 		// check that the base if valid
 		if (base < 2 || base > 36) { *result = '\0'; return result; }
@@ -203,6 +235,20 @@ int main()
         }
 		time_duration time = microsec_clock::local_time() - start;
         cout << "i_to_s:\t\t" << to_simple_string(time) << endl;
+    }
+
+    /* i_to_s */
+    {
+        char buffer[65];
+        std::string str;
+		ptime start = microsec_clock::local_time();
+        for (int i = 0; i < MAX_ITERATION; ++i)
+        {
+            i_to_s2(v[i], buffer);
+            //str = buffer;      // compensate for string ops in other benchmarks
+        }
+		time_duration time = microsec_clock::local_time() - start;
+        cout << "i_to_s2:\t\t" << to_simple_string(time) << endl;
     }
 
     /* itoa10 */
