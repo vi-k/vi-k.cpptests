@@ -38,64 +38,32 @@ struct random_fill
 
 #define MUL10( a ) (((a) << 3 ) + ((a) << 1 ))
 
-char* i_to_s(int v, char *str)
+template<class T, class Char>
+Char* signed_to(T n, Char *str)
 {
-	static const char sym[]
+	static const Char sym[]
 		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-    if (v < 0)
-    {
-        *str++ = '-';
-        v = -v;
-    }
-
-	char *ptr = str;
-
-	while (v)
-	{
-		int n = v / 10;
-		int o = v - (n<<3) - (n<<1); /* -(n * 10) */
-		*ptr++ = sym[o];
-		v = n;
-	}
-
-	*ptr-- = 0;
-
-    while (str < ptr)
-   	{
-        char tmp = *ptr;
-        *ptr-- = *str;
-        *str++ = tmp;
-    }
-
-	return ptr;
-}
-
-inline char* i_to_s2(int v, char *str)
-{
-	static const char sym[]
-		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-    if (v < 0)
+    if (n < 0)
         *str++ = '-';
     else
-        v = -v;
+        n = -n;
 
-	char *ptr = str;
+	Char *ptr = str;
 
-	while (v)
+	while (n)
 	{
-		int n = v / 10;
-		int o = v - (n<<3) - (n<<1); /* -(n * 10) */
-		*ptr++ = sym[-o];
-		v = n;
+		T nn = n / 10;
+		T o = (nn<<3) + (nn<<1) - n;
+		*ptr++ = sym[o];
+		n = nn;
 	}
 
 	*ptr-- = 0;
 
     while (str < ptr)
    	{
-        char tmp = *ptr;
+        Char tmp = *ptr;
         *ptr-- = *str;
         *str++ = tmp;
     }
@@ -103,7 +71,54 @@ inline char* i_to_s2(int v, char *str)
 	return ptr;
 }
 
-char* z_itoa(int value, char* result, int base) {
+template<class T, class Char>
+std::size_t signed_to2(T n, Char *str, std::size_t decimals = 0,
+	std::size_t width = -1)
+{
+	static const Char sym[]
+		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+	Char buf[64];
+	Char *buf_ptr = buf;
+
+	Char *str_ptr = str;
+	bool neg;
+
+    if ( (neg = n < 0) == false)
+        n = -n;
+
+	do
+	{
+		T nn = n / 10;
+		*buf_ptr++ = sym[ (nn<<3) + (nn<<1) - n ];
+		n = nn;
+	} while (n);
+
+	Char *buf_min = buf + decimals;
+	while (buf_ptr < buf_min)
+		*buf_ptr++ = '0';
+
+	if (buf_ptr - buf + neg > width)
+	{
+		Char *str_end = str + width;
+		while (str_ptr != str_end)
+   		    *str_ptr++ = '#';
+   	}
+   	else
+   	{
+	    if (neg)
+    	    *str_ptr++ = '-';
+
+		while (buf_ptr != buf)
+   		    *str_ptr++ = *--buf_ptr;
+   	}
+
+    *str_ptr = 0;
+
+	return str_ptr - str;
+}
+
+char* gcc_itoa(int value, char* result, int base) {
 		// check that the base if valid
 		if (base < 2 || base > 36) { *result = '\0'; return result; }
 	
@@ -223,32 +238,46 @@ int main()
         cout << "itoa:\t\t" << to_simple_string(time) << endl;
     }
 
-    /* i_to_s */
+    /* signed_to */
     {
         char buffer[65];
         std::string str;
 		ptime start = microsec_clock::local_time();
         for (int i = 0; i < MAX_ITERATION; ++i)
         {
-            i_to_s(v[i], buffer);
+            signed_to(v[i], buffer);
             //str = buffer;      // compensate for string ops in other benchmarks
         }
 		time_duration time = microsec_clock::local_time() - start;
-        cout << "i_to_s:\t\t" << to_simple_string(time) << endl;
+        cout << "signed_to:\t\t" << to_simple_string(time) << endl;
     }
 
-    /* i_to_s */
+    /* signed_to */
     {
         char buffer[65];
         std::string str;
 		ptime start = microsec_clock::local_time();
         for (int i = 0; i < MAX_ITERATION; ++i)
         {
-            i_to_s2(v[i], buffer);
+            signed_to2(v[i], buffer);
             //str = buffer;      // compensate for string ops in other benchmarks
         }
 		time_duration time = microsec_clock::local_time() - start;
-        cout << "i_to_s2:\t\t" << to_simple_string(time) << endl;
+        cout << "signed_to2:\t\t" << to_simple_string(time) << endl;
+    }
+
+    /* gcc_itoa */
+    {
+        char buffer[65];
+        std::string str;
+		ptime start = microsec_clock::local_time();
+        for (int i = 0; i < MAX_ITERATION; ++i)
+        {
+            gcc_itoa(v[i], buffer, 10);
+            //str = buffer;      // compensate for string ops in other benchmarks
+        }
+		time_duration time = microsec_clock::local_time() - start;
+        cout << "gcc_itoa:\t\t" << to_simple_string(time) << endl;
     }
 
     /* itoa10 */

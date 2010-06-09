@@ -6,8 +6,9 @@
 #include <algorithm>
 using namespace std;
 
-#include "../whoisalive/common/my_stopwatch.h"
-#include "../whoisalive/common/my_time.h"
+#include <my_stopwatch.h>
+#include <my_time.cpp>
+#include <my_num.cpp>
 
 #define SIZE 1000
 
@@ -129,7 +130,14 @@ int main(int argc, char *argv[])
 	{
 		for (int i = 0; i < SIZE; i++)
 		{
-			tods_dest[i] = my::time::old_to_duration(tods_s[i]);
+			try
+			{
+				tods_dest[i] = posix_time::duration_from_string(tods_s[i]);
+			}
+			catch(...)
+			{
+				tods_dest[i] = posix_time::not_a_date_time;
+			}
 		}
 	}
 	timer.finish();
@@ -197,154 +205,5 @@ int main(int argc, char *argv[])
 	cout << timer << endl;
 	test(tods, tods_dest);
 
-#if 0
-
-	for_each( strings_dest.begin(), strings_dest.end(), zero<string>);
-	timer.reset();
-	timer.start();
-	cout << "copy(iterator -> ptr):      ";
-	for (int ni = 0; ni < n; ni++)
-	{
-		for (int i = 0; i < SIZE; i++)
-		{
-			copy(strings[i].begin(), strings[i].end(),
-				(char*)strings_dest[i].c_str());
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(strings, strings_dest);
-
-
-	for_each( strings_dest.begin(), strings_dest.end(), zero<string>);
-	timer.reset();
-	timer.start();
-	cout << "copy(ptr -> ptr):           ";
-	for (int ni = 0; ni < n; ni++)
-	{
-		for (int i = 0; i < SIZE; i++)
-		{
-			copy((char*)strings[i].c_str(),
-				(char*)strings[i].c_str() + strings[i].size(),
-				(char*)strings_dest[i].c_str());
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(strings, strings_dest);
-
-	
-	for_each( strings_dest.begin(), strings_dest.end(), zero<string>);
-	timer.reset();
-	timer.start();
-	cout << "memcpy(ptr -> ptr):         ";
-	for (int ni = 0; ni < n; ni++)
-	{
-		for (int i = 0; i < SIZE; i++)
-		{
-			memcpy((char*)strings_dest[i].c_str(),
-				(char*)strings[i].c_str(), strings[i].size() + 1);
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(strings, strings_dest);
-
-
-	#ifdef _OPENMP
-	for_each( strings_dest.begin(), strings_dest.end(), zero<string>);
-	timer.reset();
-	timer.start();
-	cout << "|| memcpy(ptr -> ptr):      ";
-	for (int ni = 0; ni < n; ni++)
-	{
-		#pragma omp parallel for
-		for (int i = 0; i < SIZE; i++)
-		{
-			memcpy(&*strings_dest[i].begin(),
-				&*strings[i].begin(), strings[i].size() + 1);
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(strings, strings_dest);
-	#endif
-
-	
-	cout << "\n*** std::wstring ***\n";
-
-	for_each( wstrings_dest.begin(), wstrings_dest.end(), zero<wstring>);
-	timer.reset();
-	timer.start();
-	cout << "copy(iterator -> iterator): ";
-	for (int i = 0; i < n; i++)
-	{
-		for (vector<wstring>::iterator iter = wstrings.begin(),
-			iter_dest = wstrings_dest.begin(); iter != wstrings.end();
-			iter++, iter_dest++)
-		{
-			copy(iter->begin(), iter->end(), iter_dest->begin());
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(wstrings, wstrings_dest);
-
-
-	for_each( wstrings_dest.begin(), wstrings_dest.end(), zero<wstring>);
-	timer.reset();
-	timer.start();
-	cout << "copy(iterator -> ptr):      ";
-	for (int i = 0; i < n; i++)
-	{
-		for (vector<wstring>::iterator iter = wstrings.begin(),
-			iter_dest = wstrings_dest.begin(); iter != wstrings.end();
-			iter++, iter_dest++)
-		{
-			copy(iter->begin(), iter->end(), (wchar_t*)iter_dest->c_str());
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(wstrings, wstrings_dest);
-
-
-	for_each( wstrings_dest.begin(), wstrings_dest.end(), zero<wstring>);
-	timer.reset();
-	timer.start();
-	cout << "copy(ptr -> ptr):           ";
-	for (int i = 0; i < n; i++)
-	{
-		for (vector<wstring>::iterator iter = wstrings.begin(),
-			iter_dest = wstrings_dest.begin(); iter != wstrings.end();
-			iter++, iter_dest++)
-		{
-			copy((wchar_t*)iter->c_str(), (wchar_t*)iter->c_str() + iter->size(),
-				(wchar_t*)iter_dest->c_str());
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(wstrings, wstrings_dest);
-
-	
-	for_each( wstrings_dest.begin(), wstrings_dest.end(), zero<wstring>);
-	timer.reset();
-	timer.start();
-	cout << "memcpy(ptr -> ptr):         ";
-	for (int i = 0; i < n; i++)
-	{
-		for (vector<wstring>::iterator iter = wstrings.begin(),
-			iter_dest = wstrings_dest.begin(); iter != wstrings.end();
-			iter++, iter_dest++)
-		{
-			memcpy((wchar_t*)iter_dest->c_str(), (wchar_t*)iter->c_str(),
-				iter->size() * sizeof(wchar_t));
-		}
-	}
-	timer.finish();
-	cout << timer << endl;
-	test(wstrings, wstrings_dest);
-#endif
 	return 0;
 }
