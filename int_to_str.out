@@ -3,29 +3,30 @@ SIZE=100000
 
 *** int to char* ***
 
-itoa (internal): avg=00:00:00.010468
-itoa (from gcc): avg=00:00:00.010312
-int_to:          avg=00:00:00.005156
-my::num::int_to: avg=00:00:00.006718
-boost::karma:    avg=00:00:00.006406
-itoa10 (16 bit): avg=00:00:00.004531
-itoa10 (ver.2):  avg=00:00:00.003281
-sprintf("%d"):   avg=00:00:00.036094
+itoa (internal): avg=00:00:00.010625
+itoa (from gcc): avg=00:00:00.010469
+signed_to:       avg=00:00:00.005156
+my::num::put:    avg=00:00:00.006875
+boost::karma:    avg=00:00:00.006718
+itoa10 (16 bit): avg=00:00:00.004375
+ -//-  (ver.2):  avg=00:00:00.003750
+sprintf("%d"):   avg=00:00:00.038751
 
 *** int to std::string ***
 
-itoa (internal) (cast):       avg=00:00:00.019687
-itoa (from gcc) (cast):       avg=00:00:00.019687
-signed_to (cast):             avg=00:00:00.014062
-my::num::int_to (cast):       avg=00:00:00.015781
-my::num::int_to_string:       avg=00:00:00.017031
-boost::karma (cast):          avg=00:00:00.016250
-boost::karma (direct):        avg=00:00:00.041563
+itoa (internal) (cast):       avg=00:00:00.020000
+itoa (from gcc) (cast):       avg=00:00:00.019688
+signed_to (cast):             avg=00:00:00.013906
+my::num::put (cast):          avg=00:00:00.015312
+my::num::to_string:           avg=00:00:00.017500
+boost::karma (cast):          avg=00:00:00.015938
+boost::karma (direct):        avg=00:00:00.041407
 itoa10 (16 bit) (cast):       avg=00:00:00.013281
 * test failed: #0 163936122 vs 30586
-itoa10 (ver.2) (cast):        avg=00:00:00.012343
+ -//-  (ver.2) (cast):        avg=00:00:00.012500
 * test failed: #0 163936122 vs 30586
-iostreams (<<) (global):      avg=00:00:00.162502
-iostreams (<<) (local):       avg=00:00:00.315629
-boost::format("%d") (global): avg=00:00:00.251565
-boost::format("%d") (local):  avg=00:00:00.637508
+iostreams (<<) (global):      avg=00:00:00.164067
+iostreams (<<) (local):       avg=00:00:00.315635
+boost::format("%d") (global): avg=00:00:00.254695
+boost::format("%d") (local):  avg=00:00:00.657833
+boost::lexical_cast:          avg=00:00:00.059376

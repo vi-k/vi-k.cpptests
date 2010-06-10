@@ -1,5 +1,61 @@
 /*
 	Тест скорости преобразования числа (int) в строку
+	(примерные результаты на MSVC 9.0 в int_to_str.out)
+
+	1 часть - результат в char[].
+
+	1) Обычная itoa.
+	2) itoa от gcc (по скорости одинаково с первой).
+	3) signed_to - мой алгоритм. Ничего заумного - но
+		с использованием временного буфера. Тем самым привязан
+		к аппаратной части, в чём, честно говоря, особой проблемы
+		не вижу - на данный момент буфера хватит для 128 битных чисел,
+		при необходимости (256 бит?) в любой момент его можно увеличить.
+	4) my::num::put - безопасный вариант первого, тот же алгоритм,
+		но с заданием границ выходного буфера, что для меня очень важно.
+	5) boost::karma - позиционировался как самый быстрый, но, во первых,
+		удалось преодолеть это мнение, во-вторых, что самое важное,
+		ужасно медленно компилируется, что сильно отталкивает.
+	6) itoa10 - самый быстрый алгоритм, но слишком привязан к аппаратной
+		части. Для преобразования short, внутри использует int. 32 битная
+		версия сразу уступает в скорости из-за использования
+		несвойственного 32-битной архитектуре long long. Да и применить
+		я её не смог из-за используемого в алгоритме magic-числа.
+		Где его взять?
+	7) itoa10_2 - оригинальная версия при реверсе полученной строки
+		наивно использует обмен через xor: a ^= b ^= a ^= b. Может где-то
+		это и действует, но в реальности обычный обмен через временную
+		переменную работает значительно быстрее.
+	8) printf - для полноты эксперимента.
+
+	
+	2 часть - результат в std:string.
+
+	Для чистоты эксперимента - использовал все те же методы, но
+	с последующим преобразованием (оказалось, что такой вариант
+	быстрее, чем прямое копирование в std::string).
+
+	Новые алгоритмы:
+
+	1) my::num::to_string - для скорости использует внутри себя
+		преобразование во временный буфер через my::num::put;
+	2) boost::karma (direct) - прямое копирование в строку. Хотя,
+		на самом деле не совсем прямое (он не умеет), а через
+		back_insert_iterator. В общем, результат плачевный
+		- такое использовать не будешь.
+	3) itoa10 и itoa10_2 - здесь происходит тестирование
+		результатов. Ошибки преобразования сразу выдают всю правду
+		об алгоритме.
+	4) Вывод через потоки (stringstream). Версия global - использование
+		одного и того же потока на все циклы (что исключено в реальном
+		проекте). Версия local - как оно и было бы, как оно и есть.
+		Результат - пришлось уменьшить кол-во циклов в 10 раз, чтоб
+		не ждать долго.
+	5) boost::format - понятно, это не для таких экспериментов.
+		Хуже, чем потоки.
+	6) boost::lexical_cast - удивительно! Я ожидал гораздо худший
+		результат, ведь он, согласно документации, внутри себя использует
+		потоки, а он оказался существенно быстрее потоков!
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +83,9 @@ struct random_fill
     {
         int scale = rand() / 100 + 1;
         return (rand() * rand()) / scale;
+        
+        /* Чтобы проверить itoa10 на short'ах */
+        //return rand();
     }
 };
 
@@ -120,9 +179,6 @@ void itoa10( short a, char *s )
 
 void itoa10_2( short a, char *s )
 {
-	static const char sym[]
-		= { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
     unsigned int b = a;
     char *p;
 
@@ -137,7 +193,7 @@ void itoa10_2( short a, char *s )
     do
     {
         unsigned int d = ( b * 0x6667 ) >> 18; // magic
-        *p++ = sym[ b - MUL10( d ) ];
+        *p++ = b - MUL10( d ) + '0';
         b = d;
     }
     while ( b );
@@ -203,7 +259,7 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < SIZE; i++)
 	{
-		stringstream ss;
+		ostringstream ss;
 		ss << v[i];
 		v_s[i] = ss.str();
 	}
@@ -263,7 +319,7 @@ int main(int argc, char *argv[])
         for (nn = 0; nn < n; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    my::num::put(v[i], buf, sizeof(buf));
+        	    my::num::put(buf, sizeof(buf), v[i]);
 	        }
 	    timer.finish();
 	    timer.count = nn;
@@ -303,7 +359,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "itoa10 (ver.2):  " << flush;
+        cout << " -//-  (ver.2):  " << flush;
         
         char buf[64];
 		timer.restart();
@@ -396,7 +452,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "my::num::int_to (cast):       " << flush;
+        cout << "my::num::put (cast):          " << flush;
 		v_d.assign(SIZE, "");
         
         char buf[64];
@@ -404,7 +460,7 @@ int main(int argc, char *argv[])
         for (nn = 0; nn < n; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    my::num::int_to(v[i], buf, sizeof(buf));
+        	    my::num::put(buf, sizeof(buf), v[i]);
         	    string str(buf);
         	    v_d[i] = str;
 	        }
@@ -497,7 +553,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "itoa10 (ver.2) (cast):        " << flush;
+        cout << " -//-  (ver.2) (cast):        " << flush;
 		v_d.assign(SIZE, "");
         
         char buf[64];
@@ -520,7 +576,7 @@ int main(int argc, char *argv[])
         cout << "iostreams (<<) (global):      " << flush;
 		v_d.assign(SIZE, "");
 
-		stringstream ss;
+		ostringstream ss;
         
 		timer.restart();
         for (nn = 0; nn < n/10; ++nn)
@@ -545,7 +601,7 @@ int main(int argc, char *argv[])
         for (nn = 0; nn < n/10; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    stringstream ss;
+        	    ostringstream ss;
 	            ss << v[i];
         	    v_d[i] = ss.str();
 	        }
@@ -566,7 +622,7 @@ int main(int argc, char *argv[])
         for (nn = 0; nn < n/10; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    v_d[i] = boost::str(int_format % v[i]);
+        	    v_d[i] = (int_format % v[i]).str();
 	        }
 	    timer.finish();
 	    timer.count = nn;
@@ -583,7 +639,24 @@ int main(int argc, char *argv[])
         for (nn = 0; nn < n/10; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    v_d[i] = boost::str(boost::format("%d") % v[i]);
+        	    v_d[i] = (boost::format("%d") % v[i]).str();
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+
+		test(v_s, v_d);
+    }
+
+    {
+        cout << "boost::lexical_cast:          " << flush;
+		v_d.assign(SIZE, "");
+
+		timer.restart();
+        for (nn = 0; nn < n/10; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+        	    v_d[i] = boost::lexical_cast<string>(v[i]);
 	        }
 	    timer.finish();
 	    timer.count = nn;
