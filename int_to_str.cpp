@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "int_to:          " << flush;
+        cout << "signed_to:       " << flush;
         
         char buf[64];
 		timer.restart();
@@ -256,14 +256,14 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "my::num::int_to: " << flush;
+        cout << "my::num::put:    " << flush;
         
         char buf[64];
 		timer.restart();
         for (nn = 0; nn < n; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    my::num::signed_to(v[i], buf, sizeof(buf));
+        	    my::num::put(v[i], buf, sizeof(buf));
 	        }
 	    timer.finish();
 	    timer.count = nn;
@@ -416,14 +416,14 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "my::num::int_to_string:       " << flush;
+        cout << "my::num::to_string:           " << flush;
 		v_d.assign(SIZE, "");
         
 		timer.restart();
         for (nn = 0; nn < n; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
-        	    v_d[i] = my::num::int_to_string(v[i]);
+        	    v_d[i] = my::num::to_string(v[i]);
 	        }
 	    timer.finish();
 	    timer.count = nn;
