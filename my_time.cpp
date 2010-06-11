@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 {
 	my::stopwatch timer(MY_SW_COUNT | MY_SW_TOTAL | MY_SW_AVG);
 
-	int n = 1000;
+	int n = 100;
 	if (argc > 1)
 		n = atoi(argv[1]);
 	cout << "n=" << n << endl;
@@ -120,6 +120,53 @@ int main(int argc, char *argv[])
 	timer.count = n;
 	cout << timer << endl;
 	test(tods, tods_dest);
+
+
+	vector<string> tmp1(SIZE);
+	vector<string> tmp2(SIZE);
+	
+	timer.restart();
+	cout << "* to_str:           ";
+	for (int i = 0; i < n; i++)
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			tmp1[i] = my::time::to_string(tods[i]);
+		}
+	}
+	timer.finish();
+	timer.count = n;
+	cout << timer << endl;
+
+	timer.restart();
+	cout << "* to_str format:    ";
+	for (int i = 0; i < n; i++)
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			tmp2[i] = my::time::to_string(tods[i], "%-%H:%M:%S%F");
+		}
+	}
+	timer.finish();
+	timer.count = n;
+	cout << timer << endl;
+
+	test(tmp1, tmp2);
+
+	timer.restart();
+	cout << "* to_simple_string: ";
+	for (int i = 0; i < n; i++)
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			tmp2[i] = posix_time::to_simple_string(tods[i]);
+		}
+	}
+	timer.finish();
+	timer.count = n;
+	cout << timer << endl;
+
+	test(tmp1, tmp2);
 
 	for_each( tods_dest.begin(), tods_dest.end(),
 		zero<posix_time::time_duration>);
