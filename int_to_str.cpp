@@ -327,6 +327,24 @@ int main(int argc, char *argv[])
     }
 
     {
+        cout << "my::num::put2:   " << flush;
+        
+        char buf[64];
+        char *end = buf + sizeof(buf)/sizeof(*buf);
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::put2(ptr, end, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
         cout << "boost::karma:    " << flush;
         
         char buf[64];
