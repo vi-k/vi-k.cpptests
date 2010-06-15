@@ -312,6 +312,40 @@ int main(int argc, char *argv[])
     }
 
     {
+        cout << "put_signed_wosz3:" << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+    	    	char *ptr = buf;
+        	    my::num::put_signed_wosz_3(ptr, v[i]);
+        	    //*ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "put_signed_wosz: " << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+    	    	char *ptr = buf;
+        	    my::num::put_signed_wosz(ptr, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
         cout << "my::num::put:    " << flush;
         
         char buf[64];
@@ -327,16 +361,83 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "my::num::put2:   " << flush;
+        cout << "put_integer_10:  " << flush;
         
         char buf[64];
-        char *end = buf + sizeof(buf)/sizeof(*buf);
 		timer.restart();
         for (nn = 0; nn < n; ++nn)
 	        for (int i = 0; i < SIZE; ++i)
     	    {
 				char *ptr = buf;
-        	    my::num::put2(ptr, end, v[i]);
+        	    my::num::put_integer_10(ptr, sizeof(buf), v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "put_integer_10_2:" << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::put_integer_10_wosz(ptr, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "super_put:       " << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::super_put(ptr, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "super_put2:      " << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::super_put2(ptr, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "super_put3:      " << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::super_put3(ptr, v[i]);
         	    *ptr = 0;
 	        }
 	    timer.finish();
