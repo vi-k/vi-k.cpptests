@@ -81,8 +81,9 @@ struct random_fill
 {
     int operator()() const
     {
-        int scale = rand() / 100 + 1;
-        return (rand() * rand()) / scale;
+        //int scale = rand() / 100 + 1;
+        //return (rand() * rand()) / scale;
+        return static_cast<int>((long long)rand() * (long long)rand() * (long long)rand());
         
         /* Чтобы проверить itoa10 на short'ах */
         //return rand();
@@ -314,23 +315,6 @@ int main(int argc, char *argv[])
     }
 
     {
-        cout << "put_signed_wosz3:" << flush;
-        
-        char buf[64];
-		timer.restart();
-        for (nn = 0; nn < n; ++nn)
-	        for (int i = 0; i < SIZE; ++i)
-    	    {
-    	    	char *ptr = buf;
-        	    my::num::put_signed_wosz_3(ptr, v[i]);
-        	    //*ptr = 0;
-	        }
-	    timer.finish();
-	    timer.count = nn;
-		cout << timer << endl;
-    }
-
-    {
         cout << "put_signed_wosz: " << flush;
         
         char buf[64];
@@ -372,23 +356,6 @@ int main(int argc, char *argv[])
     	    {
 				char *ptr = buf;
         	    my::num::put_integer_10(ptr, sizeof(buf), v[i]);
-        	    *ptr = 0;
-	        }
-	    timer.finish();
-	    timer.count = nn;
-		cout << timer << endl;
-    }
-
-    {
-        cout << "put_integer_10_2:" << flush;
-        
-        char buf[64];
-		timer.restart();
-        for (nn = 0; nn < n; ++nn)
-	        for (int i = 0; i < SIZE; ++i)
-    	    {
-				char *ptr = buf;
-        	    my::num::put_integer_10_wosz(ptr, v[i]);
         	    *ptr = 0;
 	        }
 	    timer.finish();
@@ -440,6 +407,23 @@ int main(int argc, char *argv[])
     	    {
 				char *ptr = buf;
         	    my::num::super_put3(ptr, v[i]);
+        	    *ptr = 0;
+	        }
+	    timer.finish();
+	    timer.count = nn;
+		cout << timer << endl;
+    }
+
+    {
+        cout << "super_put4:      " << flush;
+        
+        char buf[64];
+		timer.restart();
+        for (nn = 0; nn < n; ++nn)
+	        for (int i = 0; i < SIZE; ++i)
+    	    {
+				char *ptr = buf;
+        	    my::num::super_put4(ptr, -1, v[i]);
         	    *ptr = 0;
 	        }
 	    timer.finish();
