@@ -1,27 +1,60 @@
 #include <string>
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
+#include <my_ptr.h>
+#include <my_thread.h>
+#include <my_employer.h>
+
+class A
+{
+public:
+	void close()
+	{
+		cout << "close()" << endl;
+	}
+
+};
+
+class B
+{
+public:
+	void operator()()
+	{
+		cout << "operator()" << endl;
+	}
+
+};
 
 int main(void)
 {
-	char ar[][6] = { "aaaaa", "bbbbb", "ccccc", "ddddd" };
+	my::employer employer;
 
-	cout << ar[0] << endl;
-	cout << ar[0] + 1 << endl;
-	cout << ar[0] + 3 << endl;
-	cout << "aaaaa" + 3 << endl;
+	A a;
 
+	my::worker::ptr ptr1 = employer.new_worker("aaa", boost::bind(&A::close, &a));
+	my::worker::ptr ptr2 = employer.new_worker("bbb", B());
 
-	std::cout << sizeof("123456789") << std::endl; //Output: 10
-	std::cout << sizeof("123456789" + 5) << std::endl; //Output: 10
-  
-	const char (&a)[10] = "123456789"; //ok
-	const char (&b)[10] = "123456789" + 3; //ok
-	//const char (&c)[10 - 3] = "123456789" + 3; //error C2440: 'initializing' : cannot convert from 'const char [10]' to 'const char (&)[7]'
+	employer.lets_finish();
 
-	cout << a << endl;
-	cout << b << endl;
-  
+	ptr1.reset();
+
+	long count = employer.number_of_workers();
+	cout << "workers: " << count << endl;
+	cout << "not finished: " << employer.check_for_finish() << endl;
+	for (long i = 0; i < count; i++)
+	{
+		cout << i << ": " << employer.worker_name( employer[i] )
+			<< " finished=" << employer.worker_finished( employer[i] ) << endl;
+	}
+
+	ptr2.reset();
+
+	employer.wait_for_finish();
+
 	return 0;
 }
